@@ -115,11 +115,16 @@
     let longitude = null;
     let marker = null;
 
+    // Route line
+    let routeLine = null;
+
+
     // Create map
     const map = L.map("map").setView(
       [16.5646748, 81.5253695],
       15
     );
+
 
     // OpenStreetMap
     L.tileLayer(
@@ -135,11 +140,14 @@
     function updateGPS() {
 
       fetch(API_URL)
+
         .then(response => response.json())
+
         .then(data => {
 
           latitude = Number(data.latitude);
           longitude = Number(data.longitude);
+
 
           // Update values
           document.getElementById("latitude").innerText =
@@ -167,6 +175,7 @@
 
           }
 
+
           // Move existing marker
           else {
 
@@ -177,12 +186,51 @@
           }
 
 
-          // Move map to GPS location
+          // Draw travelled route
+          if (
+            data.history &&
+            data.history.length > 0
+          ) {
+
+            const routePoints =
+              data.history.map(point => [
+                Number(point.latitude),
+                Number(point.longitude)
+              ]);
+
+
+            // Create route line first time
+            if (routeLine === null) {
+
+              routeLine = L.polyline(
+                routePoints,
+                {
+                  weight: 5
+                }
+              ).addTo(map);
+
+            }
+
+
+            // Update existing route
+            else {
+
+              routeLine.setLatLngs(
+                routePoints
+              );
+
+            }
+
+          }
+
+
+          // Move map to current GPS location
           map.setView(
             [latitude, longitude]
           );
 
         })
+
 
         .catch(error => {
 
@@ -192,6 +240,7 @@
             "Connection error";
 
         });
+
     }
 
 
@@ -210,14 +259,17 @@
         return;
       }
 
+
       const url =
         "https://www.google.com/maps?q=" +
         latitude + "," + longitude;
+
 
       window.open(
         url,
         "_blank"
       );
+
     }
 
 
@@ -227,6 +279,7 @@
       5000
     );
 
+
     // First update
     updateGPS();
 
@@ -234,4 +287,3 @@
 
 </body>
 </html>
-```
