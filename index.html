@@ -13,6 +13,7 @@
   >
 
   <style>
+
     * {
       box-sizing: border-box;
     }
@@ -97,6 +98,37 @@
       box-shadow: 0 0 8px rgba(34,197,94,0.6);
     }
 
+    /* ================= TRACKING STATUS ================= */
+
+    .tracking-status {
+      background: white;
+      border-radius: 12px;
+      padding: 18px 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+
+    .tracking-title {
+      font-size: 15px;
+      color: #64748b;
+    }
+
+    .tracking-value {
+      font-size: 20px;
+      font-weight: bold;
+      margin-top: 5px;
+    }
+
+    #trackingStatus {
+      color: #dc2626;
+    }
+
     /* ================= DATA CARDS ================= */
 
     .cards {
@@ -175,7 +207,6 @@
     }
 
     button {
-      background: #2563eb;
       color: white;
       border: none;
       padding: 13px 24px;
@@ -184,9 +215,34 @@
       font-weight: bold;
       cursor: pointer;
       transition: 0.2s;
+      margin: 5px;
     }
 
     button:hover {
+      transform: translateY(-1px);
+    }
+
+    .start-btn {
+      background: #16a34a;
+    }
+
+    .start-btn:hover {
+      background: #15803d;
+    }
+
+    .stop-btn {
+      background: #dc2626;
+    }
+
+    .stop-btn:hover {
+      background: #b91c1c;
+    }
+
+    .maps-btn {
+      background: #2563eb;
+    }
+
+    .maps-btn:hover {
       background: #1d4ed8;
     }
 
@@ -210,6 +266,7 @@
       #map {
         height: 450px;
       }
+
     }
 
     @media (max-width: 550px) {
@@ -231,6 +288,11 @@
         flex-direction: column;
       }
 
+      .tracking-status {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
       #map {
         height: 400px;
       }
@@ -238,7 +300,14 @@
       .card-value {
         font-size: 20px;
       }
+
+      .button-area button {
+        width: 100%;
+        margin: 5px 0;
+      }
+
     }
+
   </style>
 </head>
 
@@ -263,7 +332,7 @@
   <div class="container">
 
 
-    <!-- SYSTEM STATUS -->
+    <!-- ================= GPS SYSTEM STATUS ================= -->
 
     <div class="system-status">
 
@@ -274,18 +343,20 @@
         </div>
 
         <div class="status-value">
+
           <span class="status-indicator">
 
             <span
               class="status-dot"
-              id="statusDot"
-            ></span>
+              id="statusDot">
+            </span>
 
             <span id="status">
               Connecting...
             </span>
 
           </span>
+
         </div>
 
       </div>
@@ -299,9 +370,29 @@
 
         <div
           class="status-value"
-          id="lastUpdate"
-        >
+          id="lastUpdate">
           Waiting...
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- ================= TRACKING STATUS ================= -->
+
+    <div class="tracking-status">
+
+      <div>
+
+        <div class="tracking-title">
+          ROUTE TRACKING STATUS
+        </div>
+
+        <div
+          class="tracking-value"
+          id="trackingStatus">
+          STOPPED
         </div>
 
       </div>
@@ -324,8 +415,7 @@
 
         <div
           class="card-value"
-          id="latitude"
-        >
+          id="latitude">
           Waiting...
         </div>
 
@@ -342,8 +432,7 @@
 
         <div
           class="card-value"
-          id="longitude"
-        >
+          id="longitude">
           Waiting...
         </div>
 
@@ -419,11 +508,27 @@
       <div id="map"></div>
 
 
-      <!-- GOOGLE MAPS BUTTON -->
+      <!-- ================= CONTROL BUTTONS ================= -->
 
       <div class="button-area">
 
-        <button onclick="openGoogleMaps()">
+        <button
+          class="start-btn"
+          onclick="setTracking('start')">
+          START TRACKING
+        </button>
+
+
+        <button
+          class="stop-btn"
+          onclick="setTracking('stop')">
+          STOP TRACKING
+        </button>
+
+
+        <button
+          class="maps-btn"
+          onclick="openGoogleMaps()">
           Open Current Location in Google Maps
         </button>
 
@@ -545,6 +650,108 @@
 
 
     /* =====================================================
+       UPDATE TRACKING STATUS DISPLAY
+       ===================================================== */
+
+    function updateTrackingDisplay(tracking) {
+
+      const trackingStatus =
+        document.getElementById(
+          "trackingStatus"
+        );
+
+      if (tracking === "STARTED") {
+
+        trackingStatus.innerText =
+          "STARTED";
+
+        trackingStatus.style.color =
+          "#16a34a";
+
+      }
+
+      else {
+
+        trackingStatus.innerText =
+          "STOPPED";
+
+        trackingStatus.style.color =
+          "#dc2626";
+
+      }
+
+    }
+
+
+    /* =====================================================
+       START / STOP TRACKING
+       ===================================================== */
+
+    function setTracking(action) {
+
+      fetch(
+        API_URL +
+        "?action=" +
+        action
+      )
+
+      .then(response => {
+
+        if (!response.ok) {
+
+          throw new Error(
+            "Tracking command failed"
+          );
+
+        }
+
+        return response.json();
+
+      })
+
+      .then(data => {
+
+        updateTrackingDisplay(
+          data.tracking
+        );
+
+        if (
+          data.tracking ===
+          "STARTED"
+        ) {
+
+          alert(
+            "GPS tracking STARTED"
+          );
+
+        }
+
+        else {
+
+          alert(
+            "GPS tracking STOPPED"
+          );
+
+        }
+
+        updateGPS();
+
+      })
+
+      .catch(error => {
+
+        console.log(error);
+
+        alert(
+          "Unable to change tracking status"
+        );
+
+      });
+
+    }
+
+
+    /* =====================================================
        UPDATE GPS
        ===================================================== */
 
@@ -555,9 +762,11 @@
         .then(response => {
 
           if (!response.ok) {
+
             throw new Error(
               "Server response error"
             );
+
           }
 
           return response.json();
@@ -605,6 +814,15 @@
             "status"
           ).innerText =
             data.status;
+
+
+          /* ==========================
+             TRACKING STATUS
+             ========================== */
+
+          updateTrackingDisplay(
+            data.tracking
+          );
 
 
           /* ==========================
@@ -694,8 +912,15 @@
             const routePoints =
               data.history.map(
                 point => [
-                  Number(point.latitude),
-                  Number(point.longitude)
+
+                  Number(
+                    point.latitude
+                  ),
+
+                  Number(
+                    point.longitude
+                  )
+
                 ]
               );
 
@@ -742,11 +967,15 @@
 
               totalDistance +=
                 calculateDistance(
+
                   routePoints[i - 1][0],
+
                   routePoints[i - 1][1],
 
                   routePoints[i][0],
+
                   routePoints[i][1]
+
                 );
 
             }
