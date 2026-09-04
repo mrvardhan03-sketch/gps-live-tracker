@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>Live GPS Tracker</title>
+  <title>Live GPS Tracking System</title>
 
   <!-- Leaflet CSS -->
   <link
@@ -13,206 +13,711 @@
   >
 
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      background: #f2f2f2;
-      text-align: center;
+    * {
+      box-sizing: border-box;
     }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #eef1f5;
+      color: #222;
+    }
+
+    /* ================= HEADER ================= */
 
     header {
-      background: #111;
+      background: #111827;
       color: white;
-      padding: 18px;
+      padding: 22px 20px;
+      text-align: center;
+      border-bottom: 4px solid #2563eb;
     }
 
-    h1 {
+    header h1 {
       margin: 0;
+      font-size: 28px;
+      letter-spacing: 0.5px;
+    }
+
+    header p {
+      margin: 7px 0 0;
+      font-size: 14px;
+      color: #cbd5e1;
+    }
+
+    /* ================= MAIN ================= */
+
+    .container {
+      width: 95%;
+      max-width: 1100px;
+      margin: 25px auto;
+    }
+
+    /* ================= STATUS ================= */
+
+    .system-status {
+      background: white;
+      border-radius: 12px;
+      padding: 18px 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .status-title {
+      font-size: 15px;
+      color: #64748b;
+    }
+
+    .status-value {
+      font-size: 18px;
+      font-weight: bold;
+      margin-top: 4px;
+    }
+
+    .status-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: bold;
+    }
+
+    .status-dot {
+      width: 12px;
+      height: 12px;
+      background: #22c55e;
+      border-radius: 50%;
+      display: inline-block;
+      box-shadow: 0 0 8px rgba(34,197,94,0.6);
+    }
+
+    /* ================= DATA CARDS ================= */
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 20px;
     }
 
     .card {
       background: white;
-      max-width: 500px;
-      margin: 25px auto;
-      padding: 20px;
       border-radius: 12px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+      padding: 20px;
+      box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+      border-left: 4px solid #2563eb;
     }
 
-    .value {
+    .card-title {
+      font-size: 14px;
+      color: #64748b;
+      margin-bottom: 10px;
+    }
+
+    .card-value {
+      font-size: 22px;
+      font-weight: bold;
+      word-break: break-word;
+    }
+
+    .card-unit {
+      font-size: 13px;
+      color: #64748b;
+      margin-left: 3px;
+    }
+
+    /* ================= MAP ================= */
+
+    .map-section {
+      background: white;
+      padding: 18px;
+      border-radius: 12px;
+      box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+    }
+
+    .map-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .map-title {
       font-size: 20px;
-      margin: 12px 0;
-    }
-
-    #status {
       font-weight: bold;
     }
 
-    button {
-      padding: 12px 20px;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 16px;
-      margin-top: 10px;
+    .map-info {
+      font-size: 13px;
+      color: #64748b;
     }
 
     #map {
-      height: 400px;
-      max-width: 900px;
-      margin: 20px auto;
-      border-radius: 12px;
+      width: 100%;
+      height: 500px;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    /* ================= BUTTON ================= */
+
+    .button-area {
+      text-align: center;
+      margin-top: 18px;
+    }
+
+    button {
+      background: #2563eb;
+      color: white;
+      border: none;
+      padding: 13px 24px;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    button:hover {
+      background: #1d4ed8;
+    }
+
+    /* ================= FOOTER ================= */
+
+    footer {
+      text-align: center;
+      padding: 25px 15px;
+      color: #64748b;
+      font-size: 13px;
+    }
+
+    /* ================= RESPONSIVE ================= */
+
+    @media (max-width: 850px) {
+
+      .cards {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      #map {
+        height: 450px;
+      }
+    }
+
+    @media (max-width: 550px) {
+
+      header h1 {
+        font-size: 23px;
+      }
+
+      .container {
+        width: 94%;
+      }
+
+      .cards {
+        grid-template-columns: 1fr;
+      }
+
+      .system-status {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      #map {
+        height: 400px;
+      }
+
+      .card-value {
+        font-size: 20px;
+      }
     }
   </style>
 </head>
 
+
 <body>
 
+  <!-- ================= HEADER ================= -->
+
   <header>
-    <h1>📍 Live GPS Tracker</h1>
+
+    <h1>LIVE GPS TRACKING SYSTEM</h1>
+
+    <p>
+      ESP32 • NEO-6M GPS • Blynk IoT • Cloudflare • Web Dashboard
+    </p>
+
   </header>
 
-  <div class="card">
 
-    <div class="value">
-      Latitude:
-      <strong id="latitude">Waiting...</strong>
+  <!-- ================= MAIN ================= -->
+
+  <div class="container">
+
+
+    <!-- SYSTEM STATUS -->
+
+    <div class="system-status">
+
+      <div>
+
+        <div class="status-title">
+          GPS SYSTEM STATUS
+        </div>
+
+        <div class="status-value">
+          <span class="status-indicator">
+
+            <span
+              class="status-dot"
+              id="statusDot"
+            ></span>
+
+            <span id="status">
+              Connecting...
+            </span>
+
+          </span>
+        </div>
+
+      </div>
+
+
+      <div>
+
+        <div class="status-title">
+          LAST UPDATE
+        </div>
+
+        <div
+          class="status-value"
+          id="lastUpdate"
+        >
+          Waiting...
+        </div>
+
+      </div>
+
     </div>
 
-    <div class="value">
-      Longitude:
-      <strong id="longitude">Waiting...</strong>
+
+    <!-- ================= DATA CARDS ================= -->
+
+    <div class="cards">
+
+
+      <!-- LATITUDE -->
+
+      <div class="card">
+
+        <div class="card-title">
+          LATITUDE
+        </div>
+
+        <div
+          class="card-value"
+          id="latitude"
+        >
+          Waiting...
+        </div>
+
+      </div>
+
+
+      <!-- LONGITUDE -->
+
+      <div class="card">
+
+        <div class="card-title">
+          LONGITUDE
+        </div>
+
+        <div
+          class="card-value"
+          id="longitude"
+        >
+          Waiting...
+        </div>
+
+      </div>
+
+
+      <!-- SATELLITES -->
+
+      <div class="card">
+
+        <div class="card-title">
+          SATELLITES
+        </div>
+
+        <div class="card-value">
+
+          <span id="satellites">
+            Waiting...
+          </span>
+
+          <span class="card-unit">
+            GPS
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <!-- DISTANCE -->
+
+      <div class="card">
+
+        <div class="card-title">
+          ROUTE DISTANCE
+        </div>
+
+        <div class="card-value">
+
+          <span id="distance">
+            0.00
+          </span>
+
+          <span class="card-unit">
+            km
+          </span>
+
+        </div>
+
+      </div>
+
     </div>
 
-    <div class="value">
-      Satellites:
-      <strong id="satellites">Waiting...</strong>
-    </div>
 
-    <div class="value">
-      GPS Status:
-      <strong id="status">Waiting...</strong>
-    </div>
+    <!-- ================= MAP ================= -->
 
-    <button onclick="openGoogleMaps()">
-      📍 Open in Google Maps
-    </button>
+    <div class="map-section">
+
+
+      <div class="map-header">
+
+        <div class="map-title">
+          Live Location & Route
+        </div>
+
+        <div class="map-info">
+          Blue line = travelled route
+        </div>
+
+      </div>
+
+
+      <div id="map"></div>
+
+
+      <!-- GOOGLE MAPS BUTTON -->
+
+      <div class="button-area">
+
+        <button onclick="openGoogleMaps()">
+          Open Current Location in Google Maps
+        </button>
+
+      </div>
+
+    </div>
 
   </div>
 
-  <div id="map"></div>
+
+  <!-- ================= FOOTER ================= -->
+
+  <footer>
+
+    Live GPS Tracking System |
+    ESP32 + NEO-6M + Blynk + Cloudflare
+
+  </footer>
+
 
   <!-- Leaflet JavaScript -->
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+  </script>
+
 
   <script>
 
-    // Cloudflare Worker
+    /* =====================================================
+       CLOUDFLARE WORKER
+       ===================================================== */
+
     const API_URL =
       "https://purple-math-e7c0.mrvardhan03.workers.dev/";
 
+
+    /* =====================================================
+       VARIABLES
+       ===================================================== */
+
     let latitude = null;
+
     let longitude = null;
+
     let marker = null;
 
-    // Route line
     let routeLine = null;
 
+    let totalDistance = 0;
 
-    // Create map
+
+    /* =====================================================
+       CREATE MAP
+       ===================================================== */
+
     const map = L.map("map").setView(
       [16.5646748, 81.5253695],
       15
     );
 
 
-    // OpenStreetMap
+    /* =====================================================
+       OPEN STREET MAP
+       ===================================================== */
+
     L.tileLayer(
       "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
       {
         maxZoom: 19,
-        attribution: "&copy; OpenStreetMap contributors"
+
+        attribution:
+          "&copy; OpenStreetMap contributors"
       }
     ).addTo(map);
 
 
-    // Get GPS data
+    /* =====================================================
+       DISTANCE CALCULATION
+       Haversine Formula
+       ===================================================== */
+
+    function calculateDistance(
+      lat1,
+      lon1,
+      lat2,
+      lon2
+    ) {
+
+      const R = 6371;
+
+      const dLat =
+        (lat2 - lat1) *
+        Math.PI / 180;
+
+      const dLon =
+        (lon2 - lon1) *
+        Math.PI / 180;
+
+      const a =
+        Math.sin(dLat / 2) *
+        Math.sin(dLat / 2) +
+
+        Math.cos(lat1 * Math.PI / 180) *
+        Math.cos(lat2 * Math.PI / 180) *
+
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
+
+      const c =
+        2 *
+        Math.atan2(
+          Math.sqrt(a),
+          Math.sqrt(1 - a)
+        );
+
+      return R * c;
+    }
+
+
+    /* =====================================================
+       UPDATE GPS
+       ===================================================== */
+
     function updateGPS() {
 
       fetch(API_URL)
 
-        .then(response => response.json())
+        .then(response => {
+
+          if (!response.ok) {
+            throw new Error(
+              "Server response error"
+            );
+          }
+
+          return response.json();
+
+        })
+
 
         .then(data => {
 
-          latitude = Number(data.latitude);
-          longitude = Number(data.longitude);
+
+          /* ==========================
+             GPS VALUES
+             ========================== */
+
+          latitude =
+            Number(data.latitude);
+
+          longitude =
+            Number(data.longitude);
 
 
-          // Update values
-          document.getElementById("latitude").innerText =
+          /* ==========================
+             DISPLAY VALUES
+             ========================== */
+
+          document.getElementById(
+            "latitude"
+          ).innerText =
             latitude.toFixed(6);
 
-          document.getElementById("longitude").innerText =
+
+          document.getElementById(
+            "longitude"
+          ).innerText =
             longitude.toFixed(6);
 
-          document.getElementById("satellites").innerText =
+
+          document.getElementById(
+            "satellites"
+          ).innerText =
             data.satellites;
 
-          document.getElementById("status").innerText =
+
+          document.getElementById(
+            "status"
+          ).innerText =
             data.status;
 
 
-          // Create marker first time
-          if (marker === null) {
+          /* ==========================
+             UPDATE TIME
+             ========================== */
 
-            marker = L.marker(
-              [latitude, longitude]
-            )
-            .addTo(map)
-            .bindPopup("📍 Current GPS Location")
-            .openPopup();
+          const now =
+            new Date();
+
+          document.getElementById(
+            "lastUpdate"
+          ).innerText =
+            now.toLocaleTimeString();
+
+
+          /* ==========================
+             GPS STATUS
+             ========================== */
+
+          const statusDot =
+            document.getElementById(
+              "statusDot"
+            );
+
+
+          if (
+            data.status ===
+            "GPS FIXED"
+          ) {
+
+            statusDot.style.background =
+              "#22c55e";
+
+          }
+
+          else {
+
+            statusDot.style.background =
+              "#f59e0b";
 
           }
 
 
-          // Move existing marker
+          /* ==========================
+             CURRENT MARKER
+             ========================== */
+
+          if (marker === null) {
+
+            marker =
+              L.marker(
+                [
+                  latitude,
+                  longitude
+                ]
+              )
+              .addTo(map)
+              .bindPopup(
+                "Current GPS Location"
+              )
+              .openPopup();
+
+          }
+
           else {
 
             marker.setLatLng(
-              [latitude, longitude]
+              [
+                latitude,
+                longitude
+              ]
             );
 
           }
 
 
-          // Draw travelled route
+          /* ==========================
+             ROUTE HISTORY
+             ========================== */
+
           if (
             data.history &&
             data.history.length > 0
           ) {
 
+
             const routePoints =
-              data.history.map(point => [
-                Number(point.latitude),
-                Number(point.longitude)
-              ]);
+              data.history.map(
+                point => [
+                  Number(point.latitude),
+                  Number(point.longitude)
+                ]
+              );
 
 
-            // Create route line first time
-            if (routeLine === null) {
+            /* ==========================
+               DRAW BLUE ROUTE
+               ========================== */
 
-              routeLine = L.polyline(
-                routePoints,
-                {
-                  weight: 5
-                }
-              ).addTo(map);
+            if (
+              routeLine === null
+            ) {
+
+              routeLine =
+                L.polyline(
+                  routePoints,
+                  {
+                    weight: 5
+                  }
+                ).addTo(map);
 
             }
 
-
-            // Update existing route
             else {
 
               routeLine.setLatLngs(
@@ -221,31 +726,85 @@
 
             }
 
+
+            /* ==========================
+               CALCULATE TOTAL DISTANCE
+               ========================== */
+
+            totalDistance = 0;
+
+
+            for (
+              let i = 1;
+              i < routePoints.length;
+              i++
+            ) {
+
+              totalDistance +=
+                calculateDistance(
+                  routePoints[i - 1][0],
+                  routePoints[i - 1][1],
+
+                  routePoints[i][0],
+                  routePoints[i][1]
+                );
+
+            }
+
+
+            document.getElementById(
+              "distance"
+            ).innerText =
+              totalDistance.toFixed(2);
+
           }
 
 
-          // Move map to current GPS location
+          /* ==========================
+             MOVE MAP
+             ========================== */
+
           map.setView(
-            [latitude, longitude]
+            [
+              latitude,
+              longitude
+            ]
           );
 
         })
 
 
+        /* ==========================
+           CONNECTION ERROR
+           ========================== */
+
         .catch(error => {
 
           console.log(error);
 
-          document.getElementById("status").innerText =
-            "Connection error";
+
+          document.getElementById(
+            "status"
+          ).innerText =
+            "Connection Error";
+
+
+          document.getElementById(
+            "statusDot"
+          ).style.background =
+            "#ef4444";
 
         });
 
     }
 
 
-    // Open Google Maps
+    /* =====================================================
+       GOOGLE MAPS
+       ===================================================== */
+
     function openGoogleMaps() {
+
 
       if (
         latitude === null ||
@@ -257,12 +816,15 @@
         );
 
         return;
+
       }
 
 
       const url =
         "https://www.google.com/maps?q=" +
-        latitude + "," + longitude;
+        latitude +
+        "," +
+        longitude;
 
 
       window.open(
@@ -273,14 +835,20 @@
     }
 
 
-    // Update every 5 seconds
+    /* =====================================================
+       UPDATE EVERY 5 SECONDS
+       ===================================================== */
+
     setInterval(
       updateGPS,
       5000
     );
 
 
-    // First update
+    /* =====================================================
+       FIRST UPDATE
+       ===================================================== */
+
     updateGPS();
 
   </script>
