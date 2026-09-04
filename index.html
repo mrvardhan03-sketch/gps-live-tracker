@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,11 +7,11 @@
 
   <title>Live GPS Tracker</title>
 
-  <!-- Leaflet Map -->
+  <!-- Leaflet CSS -->
   <link
     rel="stylesheet"
     href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-  />
+  >
 
   <style>
     body {
@@ -100,7 +101,6 @@
 
   </div>
 
-  <!-- Live Map -->
   <div id="map"></div>
 
   <!-- Leaflet JavaScript -->
@@ -114,11 +114,15 @@
 
     let latitude = null;
     let longitude = null;
+    let marker = null;
 
     // Create map
-    const map = L.map("map").setView([16.5646748, 81.5253695], 15);
+    const map = L.map("map").setView(
+      [16.5646748, 81.5253695],
+      15
+    );
 
-    // OpenStreetMap tiles
+    // OpenStreetMap
     L.tileLayer(
       "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
       {
@@ -127,9 +131,8 @@
       }
     ).addTo(map);
 
-    // GPS marker
-    let marker = null;
 
+    // Get GPS data
     function updateGPS() {
 
       fetch(API_URL)
@@ -139,7 +142,7 @@
           latitude = Number(data.latitude);
           longitude = Number(data.longitude);
 
-          // Update text
+          // Update values
           document.getElementById("latitude").innerText =
             latitude.toFixed(6);
 
@@ -152,24 +155,36 @@
           document.getElementById("status").innerText =
             data.status;
 
-          // Update marker
+
+          // Create marker first time
           if (marker === null) {
 
-            marker = L.marker([latitude, longitude])
-              .addTo(map)
-              .bindPopup("📍 Current GPS Location")
-              .openPopup();
-
-          } else {
-
-            marker.setLatLng([latitude, longitude]);
+            marker = L.marker(
+              [latitude, longitude]
+            )
+            .addTo(map)
+            .bindPopup("📍 Current GPS Location")
+            .openPopup();
 
           }
 
-          // Move map to current GPS location
-          map.setView([latitude, longitude]);
+          // Move existing marker
+          else {
+
+            marker.setLatLng(
+              [latitude, longitude]
+            );
+
+          }
+
+
+          // Move map to GPS location
+          map.setView(
+            [latitude, longitude]
+          );
 
         })
+
         .catch(error => {
 
           console.log(error);
@@ -180,11 +195,18 @@
         });
     }
 
+
+    // Open Google Maps
     function openGoogleMaps() {
 
-      if (latitude === null || longitude === null) {
+      if (
+        latitude === null ||
+        longitude === null
+      ) {
 
-        alert("GPS location is not available yet.");
+        alert(
+          "GPS location is not available yet."
+        );
 
         return;
       }
@@ -193,11 +215,18 @@
         "https://www.google.com/maps?q=" +
         latitude + "," + longitude;
 
-      window.open(url, "_blank");
+      window.open(
+        url,
+        "_blank"
+      );
     }
 
-    // Update GPS every 5 seconds
-    setInterval(updateGPS, 5000);
+
+    // Update every 5 seconds
+    setInterval(
+      updateGPS,
+      5000
+    );
 
     // First update
     updateGPS();
@@ -206,3 +235,4 @@
 
 </body>
 </html>
+```
