@@ -6,6 +6,12 @@
 
   <title>Live GPS Tracker</title>
 
+  <!-- Leaflet Map -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  />
+
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -94,47 +100,74 @@
 
   </div>
 
+  <!-- Live Map -->
   <div id="map"></div>
+
+  <!-- Leaflet JavaScript -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <script>
 
-    /*
-      IMPORTANT:
-      We will put the secure backend URL here later.
+    // Cloudflare Worker
+    const API_URL =
+      "https://purple-math-e7c0.mrvardhan03.workers.dev/";
 
-      DO NOT put your Blynk Auth Token in this file.
-    */
-
-   const API_URL = "https://purple-math-e7c0.mrvardhan03.workers.dev/";
     let latitude = null;
     let longitude = null;
 
-    function updateGPS() {
+    // Create map
+    const map = L.map("map").setView([16.5646748, 81.5253695], 15);
 
-      if (API_URL === "YOUR_SECURE_BACKEND_URL") {
-        document.getElementById("status").innerText =
-          "Backend not connected yet";
-        return;
+    // OpenStreetMap tiles
+    L.tileLayer(
+      "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+      {
+        maxZoom: 19,
+        attribution: "&copy; OpenStreetMap contributors"
       }
+    ).addTo(map);
+
+    // GPS marker
+    let marker = null;
+
+    function updateGPS() {
 
       fetch(API_URL)
         .then(response => response.json())
         .then(data => {
 
-          latitude = data.latitude;
-          longitude = data.longitude;
+          latitude = Number(data.latitude);
+          longitude = Number(data.longitude);
 
+          // Update text
           document.getElementById("latitude").innerText =
-            Number(latitude).toFixed(6);
+            latitude.toFixed(6);
 
           document.getElementById("longitude").innerText =
-            Number(longitude).toFixed(6);
+            longitude.toFixed(6);
 
           document.getElementById("satellites").innerText =
             data.satellites;
 
           document.getElementById("status").innerText =
             data.status;
+
+          // Update marker
+          if (marker === null) {
+
+            marker = L.marker([latitude, longitude])
+              .addTo(map)
+              .bindPopup("📍 Current GPS Location")
+              .openPopup();
+
+          } else {
+
+            marker.setLatLng([latitude, longitude]);
+
+          }
+
+          // Move map to current GPS location
+          map.setView([latitude, longitude]);
 
         })
         .catch(error => {
@@ -150,7 +183,9 @@
     function openGoogleMaps() {
 
       if (latitude === null || longitude === null) {
+
         alert("GPS location is not available yet.");
+
         return;
       }
 
@@ -161,11 +196,10 @@
       window.open(url, "_blank");
     }
 
-    /*
-      Check for a new GPS location every 5 seconds.
-    */
+    // Update GPS every 5 seconds
     setInterval(updateGPS, 5000);
 
+    // First update
     updateGPS();
 
   </script>
